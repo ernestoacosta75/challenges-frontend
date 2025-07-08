@@ -66,15 +66,16 @@ const ChallengeComponent = ({ props }) => {
     };
 
     return (
-        <div>
-            <div>
-                <h3>Your new challenge is:</h3>
-                <h1>{a} x {b}</h1>
+        <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+            <div className="mb-4">
+                <h3 className="text-lg font-semibold">Your new challenge is:</h3>
+                <h1 className="text-2xl font-bold text-center">{a} x {b}</h1>
             </div>
-            <form onSubmit={handleSubmitResult}>
-                <label>
+            <form className="space-y-4" onSubmit={handleSubmitResult}>
+                <label className="block text-sm font-medium text-gray-700">
                     Your alias:
                     <input 
+                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
                         type="text"
                         maxLength="12"
                         name="user"
@@ -82,19 +83,21 @@ const ChallengeComponent = ({ props }) => {
                         onChange={handleChange} />
                 </label>
 
-                <label>
+                <label className="block text-sm font-medium text-gray-700">
                     Your guess:
                     <input 
+                        className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:ring-blue-500"
                         type="number"
                         min="0"
                         name="guess"
                         value={guess}
                         onChange={handleChange} />
                 </label> 
-                <br />
-                <input type="submit" value="Submit"/>               
+                <input 
+                    className="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition duration-200"
+                    type="submit" value="Submit"/>               
             </form>
-            <h4>{message}</h4>
+            {message && <h4 className="mt-4 text-center text-red-500">{message}</h4>}
         </div>
     );
 };
