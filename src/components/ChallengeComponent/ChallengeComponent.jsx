@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { useState } from "react";
 import ApiClient from "@services/ApiClient";
 
-const ChallengeComponent = ({ props }) => {
-    const [a, setA] = useState("");
-    const [b, setB] = useState("");
-    const [user, setUser] = useState("");
-    const [message, setMessage] = useState("");
-    const [guess, setGuess] = useState(0);
+const ChallengeComponent = () => {
+    const [challengeState, setChallengeState] = useState({
+        a: '',
+        b: '',
+        user: '',
+        message: '',
+        guess: 0
+    });
 
     useEffect(() => {
         const fetchChallenge = async () => {
@@ -16,13 +18,22 @@ const ChallengeComponent = ({ props }) => {
 
                 if(res.ok) {
                     const json = await res.json();
-                    setA(json.factorA);
-                    setB(json.factorB);
+                    setChallengeState(prevState => ({
+                        ...prevState,
+                        a: json.factorA,
+                        b: json.factorB
+                    }));
                 } else {
-                    updateMessage("Can't reach the server");
+                    setChallengeState(prevState => ({
+                        ...prevState,
+                        message: "Can't reach the server"
+                    }));                    
                 }
             } catch (error) {
-                updateMessage("Error: server error or not available");
+                setChallengeState(prevState => ({
+                    ...prevState,
+                    message: "Error: server error or not available"
+                }));                                    
             }
         };
 
@@ -32,32 +43,39 @@ const ChallengeComponent = ({ props }) => {
     const handleChange = (event) => {
         const { name, value } = event.target;
 
-        if (name === 'guess') {
-            setGuess(Number(value));
-        } else {
-            setUser(value);
-        }
+        setChallengeState(prevState => ({
+            ...prevState,
+            [name]: name === 'guess' ? Number(value) : value
+        }));
     };
 
     const handleSubmitResult = async (event) => {
         event.preventDefault();
 
         try {
-            const res = await ApiClient.sendGuess(user, a, b, guess);
+            const res = await ApiClient.sendGuess(challengeState.user, challengeState.a, challengeState.b, challengeState.guess);
 
             if (res.ok) {
                 const json = await res.json();
 
-                if(json.correct) {
-                    updateMessage("Congratulations! Your guess is correct");
-                } else {
-                    updateMessage(`Oops! Your guess ${json.resultAttempt} is wrong, gut keep playing!`);
-                }
+                setChallengeState(prevState => ({
+                    ...prevState,
+                    message: json.correct
+                        ? "Congratulations! Your guess is correct"
+                        : `Oops! Your guess ${json.resultAttempt} is wrong, gut keep playing!`
+                }));
             } else {
-                updateMessage("Error: server error or unavailable");
+                setChallengeState(prevState => ({
+                    ...prevState,
+                    message: `Error: ${res.status} - Server error`
+                }));
             }
         } catch (error) {
-            updateMessage("Error: server error or unavailable");
+            console.error('Submission error:', error);
+            setChallengeState(prevState => ({
+                ...prevState,
+                message: "Network error. Please try again."
+            }));            
         }
     };
 
@@ -69,7 +87,7 @@ const ChallengeComponent = ({ props }) => {
         <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
             <div className="mb-4">
                 <h3 className="text-lg font-semibold">Your new challenge is:</h3>
-                <h1 className="text-2xl font-bold text-center">{a} x {b}</h1>
+                <h1 className="text-2xl font-bold text-center">{challengeState.a} x {challengeState.b}</h1>
             </div>
             <form className="space-y-4" onSubmit={handleSubmitResult}>
                 <label className="block text-sm font-medium text-gray-700">
@@ -79,7 +97,7 @@ const ChallengeComponent = ({ props }) => {
                         type="text"
                         maxLength="12"
                         name="user"
-                        value={user}
+                        value={challengeState.user}
                         onChange={handleChange} />
                 </label>
 
@@ -90,14 +108,14 @@ const ChallengeComponent = ({ props }) => {
                         type="number"
                         min="0"
                         name="guess"
-                        value={guess}
+                        value={challengeState.guess}
                         onChange={handleChange} />
                 </label> 
                 <input 
                     className="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition duration-200"
                     type="submit" value="Submit"/>               
             </form>
-            {message && <h4 className="mt-4 text-center text-red-500">{message}</h4>}
+            {challengeState.message && <h4 className="mt-4 text-center text-red-500">{challengeState.message}</h4>}
         </div>
     );
 };
