@@ -1,10 +1,15 @@
 class ApiClient {
     static SERVER_URL = "http://localhost:8080";
     static GET_CHALLENGE = "/challenges/random";
+    static GET_ATTEMPTS_BY_ALIAS = "/attempts?alias=";
     static POST_RESULT = "/attempts";
 
     static challenge = () => {
         return fetch(ApiClient.SERVER_URL + ApiClient.GET_CHALLENGE);
+    }
+
+    static getAttempts = (userAlias) => {
+        return fetch(ApiClient.SERVER_URL + ApiClient.GET_ATTEMPTS_BY_ALIAS + userAlias);
     }
 
     static sendGuess = (user, a, b, guess) => {
